@@ -1,4 +1,4 @@
-#include "mesh3d.h"
+#include "../include/mesh3d.h"
 
 /** @file malla3d.cpp
  *  @brief Implementation of class Mesh3D
