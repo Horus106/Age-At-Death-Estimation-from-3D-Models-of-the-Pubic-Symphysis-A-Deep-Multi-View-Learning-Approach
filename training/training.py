@@ -258,7 +258,7 @@ def main(train_path, validation_path, test_path, data_path, checkpoint_filepath,
         name.append("Prediction NOT Augment FT")
         mse.append(mean_squared_error(true, pred))
         r2.append(r2_score(true, pred))
-        rmse.append(mean_squared_error(true, pred, squared= False))
+        rmse.append(root_mean_squared_error(true, pred, squared= False))
         mae.append(mean_absolute_error(true, pred))
 
         kfold_stats_df = pd.DataFrame()
