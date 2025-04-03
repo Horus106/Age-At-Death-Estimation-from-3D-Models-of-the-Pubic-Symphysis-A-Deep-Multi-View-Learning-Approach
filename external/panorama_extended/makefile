@@ -1,35 +1,66 @@
+# === Variables de configuración ===
 SRC = src/
 OBJ = obj/
 INC = include/
-OPENCV4 = /usr/include/opencv4
-LOPENCV = -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc
-COMPILER = g++ -O3 $(LOPENCV)
-FLAGS = -I$(INC) -I$(OPENCV4)
 exe = bin/panorama_extended
+
+# OpenCV detectado automáticamente
+CFLAGS = $(shell pkg-config --cflags opencv4)
+LDFLAGS = $(shell pkg-config --libs opencv4)
+COMPILER = g++ -O3
+
+# Archivos fuente, objeto y cabeceras
 units_cpp := $(wildcard $(addprefix $(SRC), *.cpp))
 units_o := $(addprefix $(OBJ), $(addsuffix .o, $(notdir $(basename $(units_cpp)))))
 headers := $(wildcard $(addprefix $(INC), *.h*))
 
+# === Reglas principales ===
+
 x: $(exe)
-	@echo Compilando $(exe)
+	@echo Compilado: $(exe)
 
 mkdir:
-	mkdir bin/ obj/
+	mkdir -p bin/ obj/
 
 init: mkdir $(exe)
-	@echo Compilando $(exe)
+	@echo Compilado: $(exe)
 
+# Enlazar ejecutable con bibliotecas al final
 $(exe): $(units_o) makefile
-	$(COMPILER) -o $(exe) $(units_o)
+	$(COMPILER) -o $(exe) $(units_o) $(LDFLAGS)
 
+# Compilar cada .cpp en .o
 $(OBJ)%.o : $(SRC)%.cpp
-	$(COMPILER) -o $@ -c $(FLAGS) $<
+	$(COMPILER) -o $@ -c $(CFLAGS) -I$(INC) $<
 
+# Forzar recompilación si cambian headers
 $(units_cpp) : $(headers)
 	touch $(units_cpp)
 
+# === PROCESAR ARCHIVOS .obj EN PARALELO (4 NÚCLEOS) ===
+procesar_obj: $(exe)
+	@echo "Procesando archivos .obj en paralelo desde /mnt/g/PubisObj/pubis..."
+	@mkdir -p out/pe out/fm
+	@find /mnt/g/PubisObj/pubis -type f -name "*.obj" | \
+	while read -r file; do \
+		dir=$$(dirname "$$file"); \
+		side=$$(basename "$$dir"); \
+		num=$$(basename $$(dirname "$$dir")); \
+		name="$$num"_$$side; \
+		echo "$$name|$$file"; \
+	done | \
+	xargs -P 4 -I{} bash -c ' \
+		entry="{}"; \
+		name=$${entry%%|*}; \
+		file=$${entry#*|}; \
+		echo "→ Ejecutando: $(exe) \"$$name\" \"$$file\" out/pe out/fm"; \
+		"$(exe)" "$$name" "$$file" "out/pe" "out/fm"; \
+	'
+
+# === Documentación con Doxygen ===
 doc:
 	doxygen Doxyfile
 
+# === Limpiar ===
 clean:
-	rm -rf obj/*.o bin/* doc/*
+	rm -rf obj/*.o bin/* doc/* out/pe/* out/fm/*
