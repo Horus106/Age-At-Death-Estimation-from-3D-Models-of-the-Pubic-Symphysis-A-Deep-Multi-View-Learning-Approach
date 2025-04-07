@@ -37,19 +37,20 @@ $(OBJ)%.o : $(SRC)%.cpp
 $(units_cpp) : $(headers)
 	touch $(units_cpp)
 
-# === PROCESAR ARCHIVOS .obj EN PARALELO (4 NÚCLEOS) ===
+# === PROCESAR ARCHIVOS .obj EN PARALELO (7 NÚCLEOS) ===
 procesar_obj: $(exe)
-	@echo "Procesando archivos .obj en paralelo desde /mnt/g/PubisObj/pubis..."
+	@echo "Procesando archivos .obj en paralelo desde /media/juanan/TOSHIBA EXT/PubisObj/pubis"
 	@mkdir -p out/pe out/fm
-	@find /mnt/g/PubisObj/pubis -type f -name "*.obj" | \
+	@find "/media/juanan/TOSHIBA EXT/PubisObj/pubis" -type f -name "*.obj" | \
 	while read -r file; do \
 		dir=$$(dirname "$$file"); \
 		side=$$(basename "$$dir"); \
-		num=$$(basename $$(dirname "$$dir")); \
+		parent=$$(dirname "$$dir"); \
+		num=$$(basename "$$parent"); \
 		name="$$num"_$$side; \
 		echo "$$name|$$file"; \
 	done | \
-	xargs -P 4 -I{} bash -c ' \
+	xargs -P 7 -I{} bash -c ' \
 		entry="{}"; \
 		name=$${entry%%|*}; \
 		file=$${entry#*|}; \
