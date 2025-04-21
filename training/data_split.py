@@ -6,28 +6,46 @@ from collections import Counter
 import cv2 as cv
 import scipy.ndimage as sci
 import functions as fn
+import os
 
-pubis_age = pd.read_csv('./pubis.csv')
+# Read the dataset (dataset.csv) to get the ages of the samples
+# Structure of the dataset.csv:
+# Number, Sample, Age
+# being the number the number of the pubis, sample the name of concrete
+# sample(remember every pubis have a right and left part) 
+# and age the age of the sample
+pubis_age = pd.read_csv('./training/dataset.csv')
 
-pubis_age.at[0,'Edad']
+pubis_age.at[0,'Age']
 
-with open('./data_img/lsFeaturemap') as f:
-    lines = f.readlines()
 
-names = [line[:-1] for line in lines]
+# Read the panorama dataset (pubis_data_proc_25_panorama_norm) to get the names of the samples
+carpeta_base = 'pubis_data_proc_25_panorama_norm'
+lines = [d for d in os.listdir(carpeta_base) if os.path.isdir(os.path.join(carpeta_base, d))]
+
+#names = [line[:-1] for line in lines]
+names = lines
 names = names[1:]
 
 dic_names = {}
 list_number = []
 for name in names:
-    n = name.split("_")[0]
-    if n == '270a' or n == '270b':
-        n = '270'
+    # n = name.split("_")[0]
+    # if n == '270a' or n == '270b':
+    #     n = '270'
         
-    age = pubis_age.at[int(n)-1,'Edad']
-    if name not in dic_names.keys():
+    # age = pubis_age.at[int(n)-1,'Age']
+    # if name not in dic_names.keys():
+    #     dic_names[name] = age
+    #     list_number.append(n)
+    if name in pubis_age['Sample'].values:
+        age = pubis_age.loc[pubis_age['Sample'] == name, 'Age'].values[0]
+        number = pubis_age.loc[pubis_age['Sample'] == name, 'Number'].values[0]
         dic_names[name] = age
-        list_number.append(n)
+        list_number.append(number)
+    else:
+        print(f"[WARN] Muestra no encontrada en dataset: {name}")
+
 
 sample_df = pd.DataFrame(list(dic_names.items()), columns=['Sample', 'Age'])
 sample_df.insert(0,"Number",list_number, True)

@@ -10,3 +10,9 @@ fotos/
 instrucciones.txt
 external/panorama_extended/out/
 external/panorama_extended/out.zip
+pubis_data_proc_25_panorama_norm/
+pubis_data_proc_25_panorama_norm.zip
+training/__pycache__
+separate_planes/__pycache__
+*.csv
+/separate_planes/normalized_data
