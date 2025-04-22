@@ -94,14 +94,25 @@ def create_CNN_Resnet(n, width, height, depth, trainable = False, summary=False)
 
     return model
 
-def get_images_list(dataframe,colormode,augment=True,weights=True):
+def get_images_list(dataframe,colormode, view='X',augment=True,weights=True):
     list = dataframe.to_numpy()
 
     image_list = []
+    # if colormode == 'rgb':
+    #     img_names = ['_panorama_ext_X.png', '_panorama_ext_Y.png', '_panorama_ext_Z.png']
+    # elif colormode == 'grayscale':
+    #     img_names = ['_panorama_SDM.png', '_panorama_NDM.png', '_panorama_GNDM.png']
+
     if colormode == 'rgb':
-        img_names = ['_panorama_ext_X.png', '_panorama_ext_Y.png', '_panorama_ext_Z.png']
+        suffix = f"_panorama_ext_{view}.png"
     elif colormode == 'grayscale':
-        img_names = ['_panorama_SDM.png', '_panorama_NDM.png', '_panorama_GNDM.png']
+        suffix = {
+            'X': '_panorama_SDM.png',
+            'Y': '_panorama_NDM.png',
+            'Z': '_panorama_GNDM.png'
+        }[view]
+
+    img_names = [suffix]  # solo una vista
 
     if augment:
         for t in list:
@@ -165,15 +176,19 @@ def image_generator(images, dir, batch_size, datagen, img_shape=(108,108), color
         for bid in range(num_batches):
             batch_idx = indexs[bid*batch_size:(bid+1)*batch_size]
             batch = [images[i] for i in batch_idx]
-            img1 = read_images_gen([b[0] for b in batch], dir, img_shape, datagen, colormode, image_cache)
-            img2 = read_images_gen([b[1] for b in batch], dir, img_shape, datagen, colormode, image_cache)
-            img3 = read_images_gen([b[2] for b in batch], dir, img_shape, datagen, colormode, image_cache)
-            label = np.array([b[3] for b in batch]).astype(np.float32)
-            if weights:
-                label_weights = np.array([b[4] for b in batch]).astype(np.float32)
-                yield ([img1, img2, img3], label, label_weights)
+
+            # Extraer solo la ruta de imagen
+            img_paths = [b[0] for b in batch]
+            label = np.array([b[1] for b in batch]).astype(np.float32)
+
+            X = read_images_gen(img_paths, dir, img_shape, datagen, colormode, image_cache)
+
+            if weights and len(batch[0]) == 3:
+                label_weights = np.array([b[2] for b in batch]).astype(np.float32)
+                yield (X, label, label_weights)
             else:
-                yield ([img1, img2, img3], label)
+                yield (X, label)
+
 
 def load_image_normalize_grayscale(images,dir,img_shape,outdir,fit_data = True,list_values = []):
     if fit_data:

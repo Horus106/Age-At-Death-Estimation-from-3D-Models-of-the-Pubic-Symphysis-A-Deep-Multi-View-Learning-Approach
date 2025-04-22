@@ -49,7 +49,7 @@ import json
 
 def main(train_path, validation_path, test_path, data_path, checkpoint_filepath, 
          batch_size, color_mode, epochs, output, resnet, seed, img_shape, depth, 
-         cnn, verbose_level, pretrained_model):
+         cnn, verbose_level, pretrained_model, view):
 
     mse = []
     r2 = []
@@ -58,13 +58,18 @@ def main(train_path, validation_path, test_path, data_path, checkpoint_filepath,
     name = []
     fold = 1
     ################################################################################
-    cnn_0 = cnn(0,img_shape[0],img_shape[1],depth)
-    cnn_1 = cnn(1,img_shape[0],img_shape[1],depth)
-    cnn_2 = cnn(2,img_shape[0],img_shape[1],depth)
+    # cnn_0 = cnn(0,img_shape[0],img_shape[1],depth)
+    # cnn_1 = cnn(1,img_shape[0],img_shape[1],depth)
+    # cnn_2 = cnn(2,img_shape[0],img_shape[1],depth)
 
-    x = Average()([cnn_0.output, cnn_1.output, cnn_2.output])
+    # x = Average()([cnn_0.output, cnn_1.output, cnn_2.output])
 
-    model = Model(inputs=[cnn_0.input, cnn_1.input, cnn_2.input], outputs=x)
+    # model = Model(inputs=[cnn_0.input, cnn_1.input, cnn_2.input], outputs=x)
+
+    # Definición de la cnn
+    cnn_model = cnn(0, img_shape[0], img_shape[1], depth)
+    model = Model(inputs=cnn_model.input, outputs=cnn_model.output)
+
 
     optimizer = Adam()
 
@@ -102,10 +107,13 @@ def main(train_path, validation_path, test_path, data_path, checkpoint_filepath,
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print('[INFO]: Training -', dt_string)
 
+    # Cargamos los paths para los distintos subconjuntos que hemos definido
+    # del conjunto global
     train_df = pd.read_csv(train_path)
     validation_df = pd.read_csv(validation_path)
     test_df = pd.read_csv(test_path)
 
+    # cargamos ahora las imagenes pertenecientes a cada subconjunto
     train = fn.get_images_list(train_df,color_mode)
     validation = fn.get_images_list(validation_df,color_mode,weights=False)
     # test = fn.get_images_list(test_df,color_mode,weights=False)
@@ -373,4 +381,5 @@ if __name__ == "__main__":
         depth, 
         cnn,
         args["verbose_keras"],
-        args["pretrained_model"])
+        args["pretrained_model"],
+        args["view"])

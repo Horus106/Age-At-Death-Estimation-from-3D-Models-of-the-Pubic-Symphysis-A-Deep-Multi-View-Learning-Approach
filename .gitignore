@@ -16,3 +16,4 @@ training/__pycache__
 separate_planes/__pycache__
 *.csv
 /separate_planes/normalized_data
+/separate_planes/slurm_separated_planes.sh
