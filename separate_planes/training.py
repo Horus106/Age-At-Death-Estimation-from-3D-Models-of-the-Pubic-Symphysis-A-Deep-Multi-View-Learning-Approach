@@ -114,10 +114,10 @@ def main(train_path, validation_path, test_path, data_path, checkpoint_filepath,
     test_df = pd.read_csv(test_path)
 
     # cargamos ahora las imagenes pertenecientes a cada subconjunto
-    train = fn.get_images_list(train_df,color_mode)
-    validation = fn.get_images_list(validation_df,color_mode,weights=False)
+    train = fn.get_images_list(train_df,color_mode, view)
+    validation = fn.get_images_list(validation_df,color_mode,view, weights=False)
     # test = fn.get_images_list(test_df,color_mode,weights=False)
-    test_not_augment = fn.get_images_list(test_df,color_mode,augment=False,weights=False)
+    test_not_augment = fn.get_images_list(test_df,color_mode,view, augment=False,weights=False)
     datagen = ImageDataGenerator()
     print("[INFO]: Starting image load process...")
     datagen_train = fn.image_generator(train, data_path, batch_size, datagen, img_shape, colormode=color_mode)

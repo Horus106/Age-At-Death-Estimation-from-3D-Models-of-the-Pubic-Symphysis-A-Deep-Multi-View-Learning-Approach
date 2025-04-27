@@ -1,0 +1,17 @@
+{
+    "data": "../pubis_data_proc_25_panorama_norm",
+    "train": "../paper_execution/train.csv",
+    "val": "../paper_execution/validation.csv",
+    "test": "../paper_execution/test.csv",
+    "batch_size": 64,
+    "epochs": 500,
+    "color_mode": "rgb",
+    "resnet": true,
+    "seed": 42,
+    "verbose": 0,
+    "verbose_keras": 2,
+    "output": "../paper_execution/221512",
+    "checkpoint": "../paper_execution/221512/checkpoint/",
+    "pretrained_model": "../resultados_TFG/221512/model_rgb_resnet/model_rgb_resnet",
+    "view": "z"
+}
